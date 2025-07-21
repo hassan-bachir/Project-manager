@@ -14,8 +14,8 @@ app.register(errorHandler);
 app.register(dbPlugin);
 
 app.register(authRoutes, { prefix: "/auth" });
-app.register(protectedRoute);
 app.register(projectsRoute, { prefix: "/projects" });
+app.register(protectedRoute);
 
 app.get("/users", async (request, reply) => {
   const users = await app.prisma.user.findMany();
