@@ -2,9 +2,8 @@ import Fastify from "fastify";
 import dotenv from "dotenv";
 import dbPlugin from "./plugins/db.js";
 import errorHandler from "./plugins/errorHandler.js";
+import authRoutes from "./routes/auth.js";
 
-import registerRoute from "./routes/register.js";
-import loginRoute from "./routes/login.js";
 import protectedRoute from "./routes/protected.js";
 
 dotenv.config();
@@ -13,13 +12,10 @@ const app = Fastify({ logger: true });
 
 app.register(errorHandler);
 app.register(dbPlugin);
-app.register(registerRoute);
-app.register(loginRoute);
-app.register(protectedRoute);
 
-app.get("/", async (request, reply) => {
-  return { message: "API is working 🎯" };
-});
+app.register(authRoutes, { prefix: "/auth" });
+
+app.register(protectedRoute);
 
 app.get("/users", async (request, reply) => {
   const users = await app.prisma.user.findMany();
