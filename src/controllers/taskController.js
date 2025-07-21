@@ -61,3 +61,69 @@ export async function listTasks(fastify, request, reply) {
 
   return reply.send(tasks);
 }
+/**
+ * PUT /tasks/:id
+ * Admins or project members only
+ */
+export async function updateTask(fastify, request, reply) {
+  const { id } = request.params;
+  const { title, description, dueDate, priority, status } = request.body;
+  const { userId, role } = request.user;
+
+  // 1) Fetch task with project membership
+  const task = await fastify.prisma.task.findUnique({
+    where: { id },
+    include: { project: { include: { members: true } } },
+  });
+  if (!task) {
+    return reply.code(404).send({ error: "Task not found" });
+  }
+
+  // 2) Authorization
+  const isMember = task.project.members.some((m) => m.userId === userId);
+  if (role !== "ADMIN" && !isMember) {
+    return reply.code(403).send({ error: "Forbidden" });
+  }
+
+  // 3) Update
+  const updated = await fastify.prisma.task.update({
+    where: { id },
+    data: {
+      title,
+      description,
+      dueDate: dueDate ? new Date(dueDate) : undefined,
+      priority: priority || undefined,
+      status: status || undefined,
+    },
+  });
+
+  return reply.send(updated);
+}
+
+/**
+ * DELETE /tasks/:id
+ * Admins or project members only
+ */
+export async function deleteTask(fastify, request, reply) {
+  const { id } = request.params;
+  const { userId, role } = request.user;
+
+  // 1) Fetch task with project membership
+  const task = await fastify.prisma.task.findUnique({
+    where: { id },
+    include: { project: { include: { members: true } } },
+  });
+  if (!task) {
+    return reply.code(404).send({ error: "Task not found" });
+  }
+
+  // 2) Authorization
+  const isMember = task.project.members.some((m) => m.userId === userId);
+  if (role !== "ADMIN" && !isMember) {
+    return reply.code(403).send({ error: "Forbidden" });
+  }
+
+  // 3) Delete
+  await fastify.prisma.task.delete({ where: { id } });
+  return reply.code(204).send();
+}
