@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import dbPlugin from "./plugins/db.js";
 import errorHandler from "./plugins/errorHandler.js";
 import authRoutes from "./routes/auth.js";
-
+import projectsRoute from "./routes/projects.js";
 import protectedRoute from "./routes/protected.js";
 
 dotenv.config();
@@ -14,8 +14,8 @@ app.register(errorHandler);
 app.register(dbPlugin);
 
 app.register(authRoutes, { prefix: "/auth" });
-
 app.register(protectedRoute);
+app.register(projectsRoute, { prefix: "/projects" });
 
 app.get("/users", async (request, reply) => {
   const users = await app.prisma.user.findMany();

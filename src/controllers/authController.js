@@ -6,8 +6,6 @@ import jwt from "jsonwebtoken";
  * POST /register
  */
 export async function registerController(fastify, request, reply) {
-  console.log("➡️ [authController] Headers:", request.headers);
-  console.log("➡️ [authController] Body:", request.body);
   const { name, email, password } = request.body;
 
   // Validate inputs
