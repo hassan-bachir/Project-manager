@@ -1,3 +1,5 @@
+import { sendMail } from "../services/emailService.js";
+
 /**
  * POST /projects/:projectId/tasks
  * Only project members (and admins) can create tasks
@@ -39,9 +41,24 @@ export async function createTask(fastify, request, reply) {
     },
     include: { assignees: true },
   });
-  const msg = JSON.stringify({ type: "TASK_ASSIGNED", task });
+
+  // 1) Build email content
+  const subject = `New Task Assigned: ${task.title}`;
+  const text = `You’ve been assigned the task "${task.title}", due on ${task.dueDate}.`;
+  const html = `<p>You’ve been assigned <strong>${task.title}</strong>.</p>
+                 <p>Due: ${task.dueDate}</p>`;
+
+  // 2) Fire off one email per assignee
+  for (const user of task.assignees) {
+    try {
+      await sendMail(user.email, subject, text, html);
+    } catch (err) {
+      fastify.log.error("Sendinblue error:", err);
+    }
+  }
 
   // Send to each assignee’s sockets
+  const msg = JSON.stringify({ type: "TASK_ASSIGNED", task });
   for (const u of task.assignees) {
     const room = fastify.userRooms.get(u.id);
     if (room) room.forEach((sock) => sock.send(msg));
