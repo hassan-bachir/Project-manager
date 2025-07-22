@@ -67,7 +67,8 @@ export async function listTasks(fastify, request, reply) {
  */
 export async function updateTask(fastify, request, reply) {
   const { id } = request.params;
-  const { title, description, dueDate, priority, status } = request.body;
+  const { title, description, dueDate, priority, status, assignees } =
+    request.body;
   const { userId, role } = request.user;
 
   // 1) Fetch task with project membership
@@ -94,6 +95,9 @@ export async function updateTask(fastify, request, reply) {
       dueDate: dueDate ? new Date(dueDate) : undefined,
       priority: priority || undefined,
       status: status || undefined,
+      assignees: assignees
+        ? { set: assignees.map((id) => ({ id })) }
+        : undefined,
     },
   });
 
