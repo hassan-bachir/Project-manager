@@ -29,6 +29,7 @@
     "fastify-plugin": "^5.0.1",
     "fastify-websocket": "^4.2.2",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "prisma": "^6.12.0",
     "sib-api-v3-sdk": "^8.5.0"
   },

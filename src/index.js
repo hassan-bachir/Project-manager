@@ -7,7 +7,7 @@ import projectsRoute from "./routes/projects.js";
 import protectedRoute from "./routes/protected.js";
 import tasksRoute from "./routes/tasks.js";
 import wsPlugin from "./plugins/ws.js";
-
+import cronPlugin from "./plugins/cron.js";
 dotenv.config();
 
 const app = Fastify({ logger: true });
@@ -15,6 +15,7 @@ const app = Fastify({ logger: true });
 app.register(wsPlugin);
 app.register(errorHandler);
 app.register(dbPlugin);
+app.register(cronPlugin);
 
 app.register(authRoutes, { prefix: "/auth" });
 app.register(projectsRoute, { prefix: "/projects" });
