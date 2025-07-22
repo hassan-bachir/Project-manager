@@ -1,4 +1,6 @@
 import { authenticate } from "../utils/auth.js";
+import { listTasksQuery } from "../schemas/task.schema.js";
+
 import {
   createTask,
   listTasks,
@@ -18,7 +20,12 @@ export default async function tasksRoute(fastify) {
   // GET /projects/:projectId/tasks
   fastify.get(
     "/projects/:projectId/tasks",
-    { preHandler: authenticate },
+    {
+      preHandler: authenticate,
+      schema: {
+        querystring: listTasksQuery,
+      },
+    },
     async (request, reply) => listTasks(fastify, request, reply)
   );
   // Update a specific task by ID

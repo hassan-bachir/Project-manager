@@ -62,9 +62,11 @@ export async function createTask(fastify, request, reply) {
 }
 
 // LIST TASKS CONTROLLER
+// QUERY TASKS
 export async function listTasks(fastify, request, reply) {
   const { projectId } = request.params;
   const { userId, role } = request.user;
+  const { status, priority, dueAfter, dueBefore } = request.query;
 
   if (role !== "ADMIN") {
     const member = await fastify.prisma.projectMember.findUnique({
@@ -75,13 +77,25 @@ export async function listTasks(fastify, request, reply) {
     }
   }
 
+  const where = { projectId };
+
+  if (status) where.status = status;
+  if (priority) where.priority = priority;
+  if (dueAfter) {
+    where.dueDate = { ...(where.dueDate || {}), gte: new Date(dueAfter) };
+  }
+  if (dueBefore) {
+    where.dueDate = { ...(where.dueDate || {}), lt: new Date(dueBefore) };
+  }
+
   const tasks = await fastify.prisma.task.findMany({
-    where: { projectId },
+    where,
     orderBy: { createdAt: "asc" },
   });
 
   return reply.send(tasks);
 }
+
 // GET TASK BY ID CONTROLLER
 export async function updateTask(fastify, request, reply) {
   const { id } = request.params;
