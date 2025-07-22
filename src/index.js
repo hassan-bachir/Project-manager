@@ -6,10 +6,13 @@ import authRoutes from "./routes/auth.js";
 import projectsRoute from "./routes/projects.js";
 import protectedRoute from "./routes/protected.js";
 import tasksRoute from "./routes/tasks.js";
+import wsPlugin from "./plugins/ws.js";
+
 dotenv.config();
 
 const app = Fastify({ logger: true });
 
+app.register(wsPlugin);
 app.register(errorHandler);
 app.register(dbPlugin);
 

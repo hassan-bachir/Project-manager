@@ -4,7 +4,13 @@
  */
 export async function createTask(fastify, request, reply) {
   const { projectId } = request.params;
-  const { title, description, dueDate, priority } = request.body;
+  const {
+    title,
+    description,
+    dueDate,
+    priority,
+    assignees = [],
+  } = request.body;
   const { userId, role } = request.user;
 
   // 1) Check membership (or admin)
@@ -25,11 +31,21 @@ export async function createTask(fastify, request, reply) {
       title,
       description,
       dueDate: new Date(dueDate),
-      priority, // expect "LOW"|"MEDIUM"|"HIGH"
+      priority,
       project: { connect: { id: projectId } },
-      // leave assignees to a separate endpoint if you like
+      assignees: {
+        connect: assignees.map((id) => ({ id })),
+      },
     },
+    include: { assignees: true },
   });
+  const msg = JSON.stringify({ type: "TASK_ASSIGNED", task });
+
+  // Send to each assignee’s sockets
+  for (const u of task.assignees) {
+    const room = fastify.userRooms.get(u.id);
+    if (room) room.forEach((sock) => sock.send(msg));
+  }
 
   return reply.status(201).send(task);
 }
@@ -99,7 +115,15 @@ export async function updateTask(fastify, request, reply) {
         ? { set: assignees.map((id) => ({ id })) }
         : undefined,
     },
+    include: { assignees: true },
   });
+
+  // 4) Notify WebSocket clients
+  const msg = JSON.stringify({ type: "TASK_UPDATED", task: updated });
+  for (const u of updated.assignees) {
+    const room = fastify.userRooms.get(u.id);
+    if (room) room.forEach((sock) => sock.send(msg));
+  }
 
   return reply.send(updated);
 }
