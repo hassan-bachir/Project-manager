@@ -1,4 +1,3 @@
-// src/services/emailService.js
 import SibApiV3Sdk from "sib-api-v3-sdk";
 
 const client = SibApiV3Sdk.ApiClient.instance;

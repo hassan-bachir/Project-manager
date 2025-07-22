@@ -1,25 +1,19 @@
-// src/controllers/authController.js
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-/**
- * POST /register
- */
+// REGISTER CONTROLLER
 export async function registerController(fastify, request, reply) {
   const { name, email, password } = request.body;
 
-  // Validate inputs
   if (!name || !email || !password) {
     return reply.status(400).send({ error: "All fields are required" });
   }
 
-  // Check for existing user
   const existing = await fastify.prisma.user.findUnique({ where: { email } });
   if (existing) {
     return reply.status(409).send({ error: "User already exists" });
   }
 
-  // Hash & save
   const hashed = await bcrypt.hash(password, 10);
   const user = await fastify.prisma.user.create({
     data: { name, email, password: hashed },
@@ -30,18 +24,14 @@ export async function registerController(fastify, request, reply) {
     .send({ message: "User registered!", userId: user.id });
 }
 
-/**
- * POST /login
- */
+// LOGIN CONTROLLER
 export async function loginController(fastify, request, reply) {
   const { email, password } = request.body;
 
-  // Validate input
   if (!email || !password) {
     return reply.status(400).send({ error: "Email and password are required" });
   }
 
-  // Lookup & verify
   const user = await fastify.prisma.user.findUnique({ where: { email } });
   if (!user) {
     return reply.status(401).send({ error: "Invalid credentials" });
@@ -51,7 +41,6 @@ export async function loginController(fastify, request, reply) {
     return reply.status(401).send({ error: "Invalid credentials" });
   }
 
-  // Sign token
   const token = jwt.sign(
     { userId: user.id, role: user.role },
     process.env.JWT_SECRET,

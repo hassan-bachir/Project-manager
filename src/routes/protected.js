@@ -1,4 +1,3 @@
-// src/routes/protected.js
 import { authenticate } from "../utils/auth.js";
 
 export default async function protectedRoute(fastify) {

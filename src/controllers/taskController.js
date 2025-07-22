@@ -1,9 +1,6 @@
 import { sendMail } from "../services/emailService.js";
 
-/**
- * POST /projects/:projectId/tasks
- * Only project members (and admins) can create tasks
- */
+// CREATE TASK CONTROLLER
 export async function createTask(fastify, request, reply) {
   const { projectId } = request.params;
   const {
@@ -15,7 +12,6 @@ export async function createTask(fastify, request, reply) {
   } = request.body;
   const { userId, role } = request.user;
 
-  // 1) Check membership (or admin)
   if (role !== "ADMIN") {
     const member = await fastify.prisma.projectMember.findUnique({
       where: {
@@ -27,7 +23,6 @@ export async function createTask(fastify, request, reply) {
     }
   }
 
-  // 2) Create task
   const task = await fastify.prisma.task.create({
     data: {
       title,
@@ -42,13 +37,12 @@ export async function createTask(fastify, request, reply) {
     include: { assignees: true },
   });
 
-  // 1) Build email content
+  // Notify assignees via email
   const subject = `New Task Assigned: ${task.title}`;
   const text = `You’ve been assigned the task "${task.title}", due on ${task.dueDate}.`;
   const html = `<p>You’ve been assigned <strong>${task.title}</strong>.</p>
                  <p>Due: ${task.dueDate}</p>`;
 
-  // 2) Fire off one email per assignee
   for (const user of task.assignees) {
     try {
       await sendMail(user.email, subject, text, html);
@@ -57,7 +51,7 @@ export async function createTask(fastify, request, reply) {
     }
   }
 
-  // Send to each assignee’s sockets
+  // Websocket notification
   const msg = JSON.stringify({ type: "TASK_ASSIGNED", task });
   for (const u of task.assignees) {
     const room = fastify.userRooms.get(u.id);
@@ -67,16 +61,11 @@ export async function createTask(fastify, request, reply) {
   return reply.status(201).send(task);
 }
 
-/**
- * GET /projects/:projectId/tasks
- * - Admins see all tasks for any project
- * - Users see tasks only if they’re a member
- */
+// LIST TASKS CONTROLLER
 export async function listTasks(fastify, request, reply) {
   const { projectId } = request.params;
   const { userId, role } = request.user;
 
-  // 1) If not admin, verify membership
   if (role !== "ADMIN") {
     const member = await fastify.prisma.projectMember.findUnique({
       where: { projectId_userId: { projectId, userId } },
@@ -86,7 +75,6 @@ export async function listTasks(fastify, request, reply) {
     }
   }
 
-  // 2) Fetch tasks
   const tasks = await fastify.prisma.task.findMany({
     where: { projectId },
     orderBy: { createdAt: "asc" },
@@ -94,17 +82,13 @@ export async function listTasks(fastify, request, reply) {
 
   return reply.send(tasks);
 }
-/**
- * PUT /tasks/:id
- * Admins or project members only
- */
+// GET TASK BY ID CONTROLLER
 export async function updateTask(fastify, request, reply) {
   const { id } = request.params;
   const { title, description, dueDate, priority, status, assignees } =
     request.body;
   const { userId, role } = request.user;
 
-  // 1) Fetch task with project membership
   const task = await fastify.prisma.task.findUnique({
     where: { id },
     include: { project: { include: { members: true } } },
@@ -113,13 +97,11 @@ export async function updateTask(fastify, request, reply) {
     return reply.code(404).send({ error: "Task not found" });
   }
 
-  // 2) Authorization
   const isMember = task.project.members.some((m) => m.userId === userId);
   if (role !== "ADMIN" && !isMember) {
     return reply.code(403).send({ error: "Forbidden" });
   }
 
-  // 3) Update
   const updated = await fastify.prisma.task.update({
     where: { id },
     data: {
@@ -135,7 +117,7 @@ export async function updateTask(fastify, request, reply) {
     include: { assignees: true },
   });
 
-  // 4) Notify WebSocket clients
+  // Websocket notification
   const msg = JSON.stringify({ type: "TASK_UPDATED", task: updated });
   for (const u of updated.assignees) {
     const room = fastify.userRooms.get(u.id);
@@ -145,15 +127,11 @@ export async function updateTask(fastify, request, reply) {
   return reply.send(updated);
 }
 
-/**
- * DELETE /tasks/:id
- * Admins or project members only
- */
+// DELETE TASK CONTROLLER
 export async function deleteTask(fastify, request, reply) {
   const { id } = request.params;
   const { userId, role } = request.user;
 
-  // 1) Fetch task with project membership
   const task = await fastify.prisma.task.findUnique({
     where: { id },
     include: { project: { include: { members: true } } },
@@ -162,13 +140,11 @@ export async function deleteTask(fastify, request, reply) {
     return reply.code(404).send({ error: "Task not found" });
   }
 
-  // 2) Authorization
   const isMember = task.project.members.some((m) => m.userId === userId);
   if (role !== "ADMIN" && !isMember) {
     return reply.code(403).send({ error: "Forbidden" });
   }
 
-  // 3) Delete
   await fastify.prisma.task.delete({ where: { id } });
   return reply.code(204).send();
 }

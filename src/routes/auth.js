@@ -1,4 +1,3 @@
-// src/routes/auth.js
 import {
   registerController,
   loginController,
@@ -9,7 +8,6 @@ export default async function authRoutes(fastify) {
     return registerController(fastify, request, reply);
   });
 
-  // same for login
   fastify.post("/login", async (request, reply) => {
     return loginController(fastify, request, reply);
   });
