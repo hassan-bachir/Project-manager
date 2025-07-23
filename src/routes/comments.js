@@ -1,7 +1,11 @@
 import { authenticate } from "../utils/auth.js";
 import { addComment, listComments } from "../controllers/commentController.js";
-import { taskIdParams, createCommentBody } from "../schemas/comment.schema.js";
-
+import {
+  taskIdParams,
+  createCommentBody,
+  createCommentResponse,
+  listCommentsResponse,
+} from "../schemas/comment.schema.js";
 export default async function commentsRoute(fastify) {
   // Add a comment
   fastify.post(
@@ -9,8 +13,11 @@ export default async function commentsRoute(fastify) {
     {
       preHandler: authenticate,
       schema: {
+        summary: "Add a comment to a task",
+        tags: ["Comments"],
         params: taskIdParams,
         body: createCommentBody,
+        response: createCommentResponse,
       },
     },
     (req, rep) => addComment(fastify, req, rep)
@@ -21,7 +28,12 @@ export default async function commentsRoute(fastify) {
     "/tasks/:taskId/comments",
     {
       preHandler: authenticate,
-      schema: { params: taskIdParams },
+      schema: {
+        summary: "List all comments for a task",
+        tags: ["Comments"],
+        params: taskIdParams,
+        response: listCommentsResponse,
+      },
     },
     (req, rep) => listComments(fastify, req, rep)
   );
