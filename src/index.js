@@ -8,6 +8,7 @@ import protectedRoute from "./routes/protected.js";
 import tasksRoute from "./routes/tasks.js";
 import wsPlugin from "./plugins/ws.js";
 import cronPlugin from "./plugins/cron.js";
+import commentsRoute from "./routes/comments.js";
 dotenv.config();
 
 const app = Fastify({ logger: true });
@@ -20,6 +21,7 @@ app.register(cronPlugin);
 app.register(authRoutes, { prefix: "/auth" });
 app.register(projectsRoute, { prefix: "/projects" });
 app.register(tasksRoute);
+app.register(commentsRoute);
 app.register(protectedRoute);
 
 app.get("/users", async (request, reply) => {
