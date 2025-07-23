@@ -9,11 +9,13 @@ import tasksRoute from "./routes/tasks.js";
 import wsPlugin from "./plugins/ws.js";
 import cronPlugin from "./plugins/cron.js";
 import commentsRoute from "./routes/comments.js";
+// import redisPlugin from "./plugins/redis.js";
 dotenv.config();
 
 const app = Fastify({ logger: true });
 
 app.register(wsPlugin);
+// app.register(redisPlugin);
 app.register(errorHandler);
 app.register(dbPlugin);
 app.register(cronPlugin);
