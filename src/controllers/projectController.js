@@ -72,7 +72,7 @@ export async function getProject(fastify, request, reply) {
 }
 
 //  UPDATE PROJECT CONTROLLER
-//  * Admins only
+//  Admins only
 export async function updateProject(fastify, request, reply) {
   const { userId, role } = request.user;
   if (role !== "ADMIN") {
@@ -94,7 +94,7 @@ export async function updateProject(fastify, request, reply) {
   return reply.send(project);
 }
 // DELETE PROJECT CONTROLLER
-// * Admins only
+// Admins only
 export async function deleteProject(fastify, request, reply) {
   const { id } = request.params;
   const { role } = request.user;

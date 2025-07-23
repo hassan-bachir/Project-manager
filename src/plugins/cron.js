@@ -10,7 +10,7 @@ export default fp(async function (fastify) {
     const now = new Date();
     const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    // 1) Find tasks due between now and 24h from now, and not yet completed
+    // Find tasks due between now and 24h from now, and not yet completed
     const tasks = await fastify.prisma.task.findMany({
       where: {
         dueDate: { gte: now, lt: in24Hours },
@@ -21,7 +21,7 @@ export default fp(async function (fastify) {
       },
     });
 
-    // 2) Send one reminder per assignee per task
+    // Send one reminder per assignee per task
     for (const task of tasks) {
       const subject = `Reminder: "${task.title}" due soon`;
       const text = `Your task "${task.title}" is due at ${task.dueDate}.`;

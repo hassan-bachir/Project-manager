@@ -1,9 +1,9 @@
+// addComment
 export async function addComment(fastify, request, reply) {
   const { taskId } = request.params;
   const { userId, role } = request.user;
   const { content } = request.body;
 
-  // 1) Ensure user can see the task
   const task = await fastify.prisma.task.findUnique({
     where: { id: taskId },
     include: { project: { include: { members: true } } },
@@ -14,7 +14,6 @@ export async function addComment(fastify, request, reply) {
     return reply.code(403).send({ error: "Forbidden" });
   }
 
-  // 2) Create the comment
   const comment = await fastify.prisma.comment.create({
     data: {
       content,
@@ -23,10 +22,9 @@ export async function addComment(fastify, request, reply) {
     },
     include: { author: { select: { id: true, name: true } } },
   });
-
-  // 3) Broadcast via WebSocket to all assignees / members
+  // Notify WebSocket clients about the new comment
   const msg = JSON.stringify({ type: "COMMENT_ADDED", comment });
-  // notify task assignees
+
   for (const a of task.project.members) {
     const room = fastify.userRooms.get(a.userId);
     room?.forEach((sock) => sock.send(msg));
@@ -35,10 +33,7 @@ export async function addComment(fastify, request, reply) {
   return reply.status(201).send(comment);
 }
 
-/**
- * GET /tasks/:taskId/comments
- * List all comments for a task
- */
+// listComments
 export async function listComments(fastify, request, reply) {
   const { taskId } = request.params;
   const comments = await fastify.prisma.comment.findMany({
