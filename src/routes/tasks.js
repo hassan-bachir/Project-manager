@@ -1,11 +1,12 @@
 import { authenticate } from "../utils/auth.js";
 import { listTasksQuery } from "../schemas/task.schema.js";
-
+import { taskHistoryParams } from "../schemas/history.schema.js";
 import {
   createTask,
   listTasks,
   updateTask,
   deleteTask,
+  getTaskHistory,
 } from "../controllers/taskController.js";
 
 export default async function tasksRoute(fastify) {
@@ -41,5 +42,17 @@ export default async function tasksRoute(fastify) {
     "/tasks/:id",
     { preHandler: authenticate },
     async (request, reply) => deleteTask(fastify, request, reply)
+  );
+  // GET task history
+  // GET /tasks/:id/history
+  fastify.get(
+    "/tasks/:id/history",
+    {
+      preHandler: authenticate,
+      schema: {
+        params: taskHistoryParams,
+      },
+    },
+    (request, reply) => getTaskHistory(fastify, request, reply)
   );
 }

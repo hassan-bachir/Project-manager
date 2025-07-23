@@ -96,22 +96,25 @@ export async function listTasks(fastify, request, reply) {
   return reply.send(tasks);
 }
 
-// GET TASK BY ID CONTROLLER
+// UPDATE TASK CONTROLLER
 export async function updateTask(fastify, request, reply) {
   const { id } = request.params;
   const { title, description, dueDate, priority, status, assignees } =
     request.body;
   const { userId, role } = request.user;
 
-  const task = await fastify.prisma.task.findUnique({
+  const original = await fastify.prisma.task.findUnique({
     where: { id },
-    include: { project: { include: { members: true } } },
+    include: {
+      project: { include: { members: true } },
+      assignees: { select: { id: true } },
+    },
   });
-  if (!task) {
+  if (!original) {
     return reply.code(404).send({ error: "Task not found" });
   }
 
-  const isMember = task.project.members.some((m) => m.userId === userId);
+  const isMember = original.project.members.some((m) => m.userId === userId);
   if (role !== "ADMIN" && !isMember) {
     return reply.code(403).send({ error: "Forbidden" });
   }
@@ -125,17 +128,76 @@ export async function updateTask(fastify, request, reply) {
       priority: priority || undefined,
       status: status || undefined,
       assignees: assignees
-        ? { set: assignees.map((id) => ({ id })) }
+        ? { set: assignees.map((uid) => ({ id: uid })) }
         : undefined,
     },
-    include: { assignees: true },
+    include: { assignees: { select: { id: true } } },
   });
 
-  // Websocket notification
   const msg = JSON.stringify({ type: "TASK_UPDATED", task: updated });
   for (const u of updated.assignees) {
     const room = fastify.userRooms.get(u.id);
     if (room) room.forEach((sock) => sock.send(msg));
+  }
+
+  const changes = [];
+
+  if (title != null && original.title !== updated.title) {
+    changes.push({ field: "title", old: original.title, new: updated.title });
+  }
+  if (description != null && original.description !== updated.description) {
+    changes.push({
+      field: "description",
+      old: original.description,
+      new: updated.description,
+    });
+  }
+  if (
+    dueDate != null &&
+    original.dueDate?.toISOString() !== updated.dueDate.toISOString()
+  ) {
+    changes.push({
+      field: "dueDate",
+      old: original.dueDate.toISOString(),
+      new: updated.dueDate.toISOString(),
+    });
+  }
+  if (priority != null && original.priority !== updated.priority) {
+    changes.push({
+      field: "priority",
+      old: original.priority,
+      new: updated.priority,
+    });
+  }
+  if (status != null && original.status !== updated.status) {
+    changes.push({
+      field: "status",
+      old: original.status,
+      new: updated.status,
+    });
+  }
+  if (assignees) {
+    const oldIds = original.assignees.map((a) => a.id).sort();
+    const newIds = updated.assignees.map((a) => a.id).sort();
+    if (JSON.stringify(oldIds) !== JSON.stringify(newIds)) {
+      changes.push({
+        field: "assignees",
+        old: JSON.stringify(oldIds),
+        new: JSON.stringify(newIds),
+      });
+    }
+  }
+
+  for (const c of changes) {
+    await fastify.prisma.taskHistory.create({
+      data: {
+        taskId: id,
+        userId: userId,
+        field: c.field,
+        oldValue: c.old,
+        newValue: c.new,
+      },
+    });
   }
 
   return reply.send(updated);
@@ -161,4 +223,29 @@ export async function deleteTask(fastify, request, reply) {
 
   await fastify.prisma.task.delete({ where: { id } });
   return reply.code(204).send();
+}
+// GET TASK HISTORY CONTROLLER
+export async function getTaskHistory(fastify, request, reply) {
+  const { id } = request.params;
+  const { userId, role } = request.user;
+
+  const task = await fastify.prisma.task.findUnique({
+    where: { id },
+    include: { project: { include: { members: true } } },
+  });
+  if (!task) {
+    return reply.code(404).send({ error: "Task not found" });
+  }
+
+  const isMember = task.project.members.some((m) => m.userId === userId);
+  if (role !== "ADMIN" && !isMember) {
+    return reply.code(403).send({ error: "Forbidden" });
+  }
+
+  const history = await fastify.prisma.taskHistory.findMany({
+    where: { taskId: id },
+    orderBy: { timestamp: "asc" },
+  });
+
+  return reply.send(history);
 }
