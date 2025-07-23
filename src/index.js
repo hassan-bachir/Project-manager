@@ -9,6 +9,9 @@ import tasksRoute from "./routes/tasks.js";
 import wsPlugin from "./plugins/ws.js";
 import cronPlugin from "./plugins/cron.js";
 import commentsRoute from "./routes/comments.js";
+import multipart from "@fastify/multipart";
+import attachmentRoute from "./routes/attachments.js";
+
 // import redisPlugin from "./plugins/redis.js";
 dotenv.config();
 
@@ -19,12 +22,16 @@ app.register(wsPlugin);
 app.register(errorHandler);
 app.register(dbPlugin);
 app.register(cronPlugin);
+app.register(multipart, {
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+});
 
 app.register(authRoutes, { prefix: "/auth" });
 app.register(projectsRoute, { prefix: "/projects" });
 app.register(tasksRoute);
 app.register(commentsRoute);
 app.register(protectedRoute);
+app.register(attachmentRoute);
 
 app.get("/users", async (request, reply) => {
   const users = await app.prisma.user.findMany();

@@ -85,6 +85,7 @@ model Task {
   assignees User[]        @relation("AssignedTasks")
   history   TaskHistory[]
   comments  Comment[]
+  attachments Attachment[]
 }
 
 model Comment {
@@ -107,4 +108,13 @@ model TaskHistory {
   oldValue  String?
   newValue  String?
   timestamp DateTime @default(now())
+}
+model Attachment {
+  id         String   @id @default(uuid())
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId     String
+  filename   String
+  mimeType   String
+  url        String   
+  uploadedAt DateTime @default(now())
 }
