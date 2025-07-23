@@ -17,6 +17,7 @@ export const listTasksQuery = {
       type: "string",
       format: "date-time",
     },
+    search: { type: "string" },
   },
   additionalProperties: false,
 };

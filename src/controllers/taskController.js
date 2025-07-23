@@ -66,7 +66,7 @@ export async function createTask(fastify, request, reply) {
 export async function listTasks(fastify, request, reply) {
   const { projectId } = request.params;
   const { userId, role } = request.user;
-  const { status, priority, dueAfter, dueBefore } = request.query;
+  const { status, priority, dueAfter, dueBefore, search } = request.query;
 
   if (role !== "ADMIN") {
     const member = await fastify.prisma.projectMember.findUnique({
@@ -86,6 +86,14 @@ export async function listTasks(fastify, request, reply) {
   }
   if (dueBefore) {
     where.dueDate = { ...(where.dueDate || {}), lt: new Date(dueBefore) };
+  }
+
+  if (search) {
+    where.OR = [
+      { id: { equals: search } },
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
   }
 
   const tasks = await fastify.prisma.task.findMany({
