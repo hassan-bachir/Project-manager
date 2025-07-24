@@ -11,11 +11,34 @@ import cronPlugin from "./plugins/cron.js";
 import commentsRoute from "./routes/comments.js";
 import multipart from "@fastify/multipart";
 import attachmentRoute from "./routes/attachments.js";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 
 // import redisPlugin from "./plugins/redis.js";
 dotenv.config();
 
 const app = Fastify({ logger: true });
+
+app.register(swagger, {
+  openapi: {
+    info: {
+      title: "Project Manager API",
+      description: "generated docs for Project Manager API",
+      version: "1.0.0",
+    },
+    servers: [{ url: "http://localhost:3000", description: "Local server" }],
+  },
+});
+app.register(swaggerUi, {
+  routePrefix: "/docs",
+  uiConfig: { docExpansion: "list" },
+  uiHooks: {
+    onRequest: (_req, _reply, next) => next(),
+    preHandler: (_req, _reply, next) => next(),
+  },
+  staticCSP: true,
+  transformStaticCSP: (header) => header,
+});
 
 app.register(wsPlugin);
 // app.register(redisPlugin);
@@ -37,8 +60,8 @@ app.get("/users", async (request, reply) => {
   const users = await app.prisma.user.findMany();
   return users;
 });
-
-app.listen({ port: 3000 }, (err, address) => {
+const PORT = process.env.PORT || 3000;
+app.listen({ port: PORT }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
