@@ -4,7 +4,7 @@ import dbPlugin from "./plugins/db.js";
 import errorHandler from "./plugins/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 import projectsRoute from "./routes/projects.js";
-import protectedRoute from "./routes/protected.js";
+
 import tasksRoute from "./routes/tasks.js";
 import wsPlugin from "./plugins/ws.js";
 import cronPlugin from "./plugins/cron.js";
@@ -13,7 +13,7 @@ import multipart from "@fastify/multipart";
 import attachmentRoute from "./routes/attachments.js";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-
+import usersRoute from "./routes/users.js";
 // import redisPlugin from "./plugins/redis.js";
 dotenv.config();
 
@@ -53,13 +53,10 @@ app.register(authRoutes, { prefix: "/auth" });
 app.register(projectsRoute, { prefix: "/projects" });
 app.register(tasksRoute);
 app.register(commentsRoute);
-app.register(protectedRoute);
-app.register(attachmentRoute);
 
-app.get("/users", async (request, reply) => {
-  const users = await app.prisma.user.findMany();
-  return users;
-});
+app.register(attachmentRoute);
+app.register(usersRoute);
+
 const PORT = process.env.PORT || 3000;
 app.listen({ port: PORT }, (err, address) => {
   if (err) {
