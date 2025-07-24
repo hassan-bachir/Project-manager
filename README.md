@@ -48,12 +48,3 @@ Teams can manage projects & tasks, collaborate via comments & attachments, see r
 - Git CLI
 
 ---
-
-## ⚙️ Local Setup
-
-1. **Clone & install dependencies**
-   ```bash
-   git clone <your-repo-url>
-   cd project-manager
-   npm install
-   ```
