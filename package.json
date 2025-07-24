@@ -4,7 +4,8 @@
   "description": "A SaaS project manager that manages projects collaboration and tasks between teams",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "test": "mocha \"tests/**/*.test.js\" --exit"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,9 @@
     "sib-api-v3-sdk": "^8.5.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "chai": "^5.2.1",
+    "mocha": "^11.7.1",
+    "nodemon": "^3.1.10",
+    "sinon": "^21.0.0"
   }
 }
