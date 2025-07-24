@@ -4,7 +4,7 @@ import dbPlugin from "./plugins/db.js";
 import errorHandler from "./plugins/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 import projectsRoute from "./routes/projects.js";
-
+import analyticsRoute from "./routes/analytics.js";
 import tasksRoute from "./routes/tasks.js";
 import wsPlugin from "./plugins/ws.js";
 import cronPlugin from "./plugins/cron.js";
@@ -53,7 +53,7 @@ app.register(authRoutes, { prefix: "/auth" });
 app.register(projectsRoute, { prefix: "/projects" });
 app.register(tasksRoute);
 app.register(commentsRoute);
-
+app.register(analyticsRoute);
 app.register(attachmentRoute);
 app.register(usersRoute);
 
