@@ -61,8 +61,12 @@ Teams can manage projects & tasks, collaborate via comments & attachments, see r
 2. **Environment Variables**
 
 - Copy .env.example to .env and fill in:
+
   ```bash
-  git clone <your‑repo‑url>
-  cd project-manager
-  npm install
+  DATABASE_URL="postgresql://postgres:<PASSWORD>@localhost:5432/<DATABASE_NAME>"
+  JWT_SECRET=<YOUR_KEY>
+  SENDINBLUE_API_KEY=<BREVO_API_KEY>
+    EMAIL_FROM='{"name":"<YOUR_NAME>","<YOUR_EMAIL>"}'
+
+    PORT=<SERVER_PORT>
   ```
