@@ -19,7 +19,6 @@ Teams can manage projects & tasks, collaborate via comments & attachments, see r
   - “Due Soon”: daily reminder via cron
 - **Analytics**: Overview & per‑user stats endpoints
 - **Validation & Docs**: Fastify JSON‑Schemas + Swagger UI
-- **Testing**: Mocha/Chai/Sinon unit tests, aiming for ≥ 80% coverage
 
 ---
 
@@ -43,8 +42,27 @@ Teams can manage projects & tasks, collaborate via comments & attachments, see r
 
 - Node.js v16 or newer
 - PostgreSQL v12+ running locally
-- (Optional) Redis on `localhost:6379` for caching
 - A Brevo account & API key
 - Git CLI
 
 ---
+
+## ⚙️ Setup & Run Locally
+
+1. **Clone** and **install**
+
+   ```bash
+   git clone https://github.com/hassan-bachir/Project-manager
+   cd project-manager
+   npm install
+
+   ```
+
+2. **Environment Variables**
+
+- Copy .env.example to .env and fill in:
+  ```bash
+  git clone <your‑repo‑url>
+  cd project-manager
+  npm install
+  ```
