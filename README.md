@@ -127,6 +127,14 @@ Teams can manage projects & tasks, collaborate via comments & attachments, see r
 
   - POST /auth/login
 
+- Users (Admin only)
+
+  - GET /users
+
+  - PUT /users/:id/role
+
+  - DELETE /users/:id
+
 - Projects
 
   - GET /projects?search=
