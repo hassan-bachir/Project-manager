@@ -123,50 +123,57 @@ Teams can manage projects & tasks, collaborate via comments & attachments, see r
 
 - Auth
 
-POST /auth/register
+  - POST /auth/register
 
-POST /auth/login
+  - POST /auth/login
 
-Projects
+- Projects
 
-GET /projects?search=
+  - GET /projects?search=
 
-POST /projects
+  - POST /projects
 
-GET /projects/:id
+  - GET /projects/:id
 
-PUT /projects/:id
+  - PUT /projects/:id
 
-DELETE /projects/:id
+  - DELETE /projects/:id
 
-Tasks
+- Tasks
 
-GET /projects/:projectId/tasks
+  - GET /projects/:projectId/tasks
 
-POST /projects/:projectId/tasks
+  - POST /projects/:projectId/tasks
 
-PUT /tasks/:id
+  - PUT /tasks/:id
 
-DELETE /tasks/:id
+  - DELETE /tasks/:id
 
-Comments
+- Comments
 
-GET /tasks/:taskId/comments
+  - GET /tasks/:taskId/comments
 
-POST /tasks/:taskId/comments
+  - POST /tasks/:taskId/comments
 
-Attachments
+- Attachments
 
-POST /tasks/:taskId/attachments
+  - POST /tasks/:taskId/attachments
 
-Analytics
+- Analytics
 
-GET /analytics/overview
+  - GET /analytics/overview
 
-GET /analytics/users/:id/stats
+  - GET /analytics/users/:id/stats
 
-Docs
+- Docs
 
-Swagger UI: GET /docs
+  - Swagger UI: GET /docs
 
-Raw spec: GET /documentation/json
+  - Raw spec: GET /documentation/json
+
+## ⚖️ License
+
+- This project is released under the MIT License.
+  Feel free to use, adapt, and extend as you see fit.
+
+# Happy coding! 🚀
